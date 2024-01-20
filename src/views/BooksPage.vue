@@ -1,10 +1,7 @@
 <template>
-  
   <div class="container mx-auto p-6">
-    <!-- Title -->
     <h1 class="text-3xl font-semibold mb-5">Books</h1>
 
-    <!-- Search Bar -->
     <div class="mb-6">
       <input
         type="text"
@@ -14,7 +11,6 @@
       />
     </div>
 
-    <!-- Form for adding a new book -->
     <form @submit.prevent="addBook" class="mb-6 flex flex-wrap gap-4">
       <input
         v-model="newBook.name"
@@ -49,24 +45,28 @@
       </button>
     </form>
 
-    <!-- Grid of books -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <!-- Book Card -->
       <div
         v-for="book in filteredBooks"
         :key="book.id"
         class="bg-white p-4 rounded shadow"
       >
-        <h2 class="text-xl font-bold">{{ book.name }}</h2>
-        <p class="text-gray-600">Author: {{ book.author }}</p>
-        <p class="text-gray-600">Year: {{ book.year_published }}</p>
-        <p class="text-gray-600">Type: {{ book.book_type }}</p>
-        <button
-          @click="deleteBook(book.id)"
-          class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded mt-2"
-        >
-          Delete
-        </button>
+        <div v-if="book.editing">
+          <input type="text" v-model="book.name" class="p-2 border border-gray-300 rounded">
+          <input type="text" v-model="book.author" class="p-2 border border-gray-300 rounded">
+          <input type="number" v-model="book.year_published" class="p-2 border border-gray-300 rounded">
+          <input type="text" v-model="book.book_type" class="p-2 border border-gray-300 rounded">
+          <button @click="updateBook(book)" class="bg-green-500 text-white p-2 rounded">Save</button>
+          <button @click="cancelEditing(book)" class="bg-gray-500 text-white p-2 rounded">Cancel</button>
+        </div>
+        <div v-else>
+          <h2 class="text-xl font-bold">{{ book.name }}</h2>
+          <p class="text-gray-600">Author: {{ book.author }}</p>
+          <p class="text-gray-600">Year: {{ book.year_published }}</p>
+          <p class="text-gray-600">Type: {{ book.book_type }}</p>
+          <button @click="enableEditing(book)" class="bg-blue-500 text-white p-2 rounded">Edit</button>
+          <button @click="deleteBook(book.id)" class="bg-red-500 text-white p-2 rounded">Delete</button>
+        </div>
       </div>
     </div>
   </div>
@@ -76,22 +76,21 @@
 export default {
   data() {
     return {
-      books: [], // Holds the array of books
+      books: [],
       newBook: {
         name: '',
         author: '',
         year_published: '',
         book_type: '',
-        status: 'available' // Default status for new books
+        status: 'available'
       },
-      searchQuery: '' // Bound to the search input
+      searchQuery: ''
     };
   },
   computed: {
     filteredBooks() {
-      // Filters books based on the search query
       return this.searchQuery
-        ? this.books.filter((book) =>
+        ? this.books.filter(book =>
             book.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
             book.author.toLowerCase().includes(this.searchQuery.toLowerCase())
           )
@@ -100,71 +99,67 @@ export default {
   },
   methods: {
     fetchBooks() {
-      // Fetches books from the server
       this.$axios.get('/api/books/')
-        .then((response) => {
-          this.books = response.data.books; // Assumes response.data.books is the array of books
+        .then(response => {
+          this.books = response.data.books;
+          // Ensure each book has an 'editing' property
+          this.books.forEach(book => this.$set(book, 'editing', false));
         })
-        .catch((error) => {
+        .catch(error => {
           console.error("Error fetching books:", error);
         });
     },
     addBook() {
-      // Adds a new book to the server
       this.$axios.post('/api/books/', this.newBook)
         .then(() => {
-          this.fetchBooks(); // Refresh the books list
-          this.newBook = { name: '', author: '', year_published: '', book_type: '', status: 'available' }; // Reset form
+          this.fetchBooks();
+          this.newBook = { name: '', author: '', year_published: '', book_type: '', status: 'available' };
         })
-        .catch((error) => {
+        .catch(error => {
           console.error("Error adding book:", error);
         });
     },
     deleteBook(bookId) {
-      // Deletes a book from the server
       this.$axios.delete(`/api/books/${bookId}/`)
         .then(() => {
-          this.fetchBooks(); // Refresh the books list
+          this.fetchBooks();
         })
-        .catch((error) => {
+        .catch(error => {
           console.error("Error deleting book:", error);
         });
     },
     enableEditing(book) {
-      // We are adding an 'editing' property to activate the edit mode
-      this.$set(book, 'editing', true);
+      book.editing = true;
     },
     updateBook(book) {
-      // Perform the update request here
-      const updatedData = {
+      const updatedBook = {
         name: book.name,
         author: book.author,
         year_published: book.year_published,
-        book_type: book.book_type
+        book_type: book.book_type,
+        status: book.status // Include the status if you have it in your form
       };
-      this.$axios.put(`/api/books/${book.id}/`, updatedData)
-        .then(response => {
-          // On successful update, exit editing mode and refresh the list
+
+      this.$axios.put(`/api/books/${book.id}/`, updatedBook)
+        .then(() => {
           book.editing = false;
           this.fetchBooks();
         })
         .catch(error => {
-          console.error("There was an error updating the book:", error);
+          console.error("Error updating book:", error);
         });
     },
     cancelEditing(book) {
-      // Exit editing mode without saving changes
       book.editing = false;
-      // Optionally, refresh the list to revert changes
-      // this.fetchBooks();
-    },
+      this.fetchBooks(); // To revert any unsaved changes
+    }
   },
   mounted() {
-    this.fetchBooks(); // Fetch books when the component is mounted
+    this.fetchBooks();
   }
 };
 </script>
 
 <style scoped>
-/* Custom styles for your component */
+/* Add custom styles if needed */
 </style>
