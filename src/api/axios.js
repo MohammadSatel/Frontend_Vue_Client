@@ -5,7 +5,7 @@ const instance = axios.create({
   baseURL: 'http://127.0.0.1:5000' // Your API base URL here
 });
 
-// Alter defaults after instance has been created
-instance.defaults.headers.common['Authorization'] = AUTH_TOKEN; // If you have any auth tokens
+// If you have an auth token, uncomment the following line and replace 'YOUR_AUTH_TOKEN' with your actual token
+// instance.defaults.headers.common['Authorization'] = 'Bearer YOUR_AUTH_TOKEN';
 
 export default instance;
