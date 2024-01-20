@@ -1,45 +1,37 @@
 <template>
-  <div class="loans-page">
+  <div>
     <h1>Loans</h1>
-    <LoanList :loans="loans" />
-    <!-- Add more components for loans functionality -->
+    <ul>
+      <li v-for="loan in loans" :key="loan.id">
+        {{ loan.customer_name }} has borrowed {{ loan.book_name }}
+        <!-- Add other loan details here -->
+      </li>
+    </ul>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
-import LoanList from '@/components/LoanList.vue';
 
 export default {
-  components: {
-    LoanList,
-  },
   data() {
     return {
-      loans: [],
+      loans: []
     };
   },
-  mounted() {
+  created() {
     this.fetchLoans();
   },
   methods: {
     fetchLoans() {
-      // Replace with your actual API endpoint
-      axios.get('/api/loans')
+      axios.get('http://127.0.0.1:5000/api/loans')  // Update to match your Flask API URL
         .then(response => {
-          this.loans = response.data.loans;
+          this.loans = response.data;
         })
         .catch(error => {
-          console.error('Error fetching loans:', error);
+          console.error('There was an error fetching the loans:', error);
         });
-    },
-  },
+    }
+  }
 };
 </script>
-
-<style scoped>
-/* Your CSS for LoansPage.vue */
-.loans-page {
-  padding: 1rem;
-}
-</style>

@@ -1,7 +1,12 @@
-// src/main.js
 import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
-import './assets/styles/tailwind.css'; // Ensure this points to your Tailwind CSS file
+import axios from './api/axios'; // Adjusted for the new file location
 
-createApp(App).use(router).mount('#app');
+const app = createApp(App);
+app.use(router);
+
+// Use Axios instance globally
+app.config.globalProperties.$axios = axios;
+
+app.mount('#app');
