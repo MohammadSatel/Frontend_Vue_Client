@@ -13,13 +13,10 @@
 </template>
 
 <script>
-// Assume axios is globally imported, otherwise import it
 export default {
-  props: {
-    onBookAdded: Function // Parent component can pass a callback
-  },
   data() {
     return {
+      // Data model for a new book
       newBook: {
         name: '',
         author: '',
@@ -30,14 +27,20 @@ export default {
   },
   methods: {
     addBook() {
-      axios.post('/api/books/', this.newBook)
-        .then(response => {
-          this.$emit('bookAdded'); // Notify parent component
-          this.newBook = { name: '', author: '', year_published: '', book_type: '' }; // Reset form
+      // Posts the new book to the server
+      this.$axios.post('/api/books/', this.newBook)
+        .then(() => {
+          this.$emit('bookAdded'); // Emit an event after adding the book
+          this.resetForm(); // Reset the form fields
         })
         .catch(error => {
-          console.error("There was an error adding the book:", error);
+          // Handle the error response here
+          console.error("There was an error adding the book:", error.response.data);
         });
+    },
+    resetForm() {
+      // Resets the newBook object to clear the form
+      this.newBook = { name: '', author: '', year_published: '', book_type: '' };
     }
   }
 };
