@@ -1,19 +1,19 @@
+<!-- src/App.vue -->
 <template>
-  <div id="app" class="min-h-screen bg-fixed bg-center bg-cover" style="background-image: url('~@/assets/library-background.png');">
-    <NavBar />
-    <div class="pt-16">
-      <router-view/>
-    </div>
+  <div id="app">
+    <AppNavBar />
+    <router-view></router-view> <!-- This is where your routed components will be displayed -->
   </div>
 </template>
 
+
 <script>
-import NavBar from '@/components/NavBar.vue';
+import AppNavBar from './components/AppNavBar.vue';
 
 export default {
-  name: 'NavBar',
+  name: 'App',
   components: {
-    NavBar
+    AppNavBar // This key should match the name used in the template
   }
 };
 </script>
