@@ -2,7 +2,6 @@
   <div class="container mx-auto p-6">
     <h1 class="text-3xl font-semibold mb-5">Customers</h1>
 
-    <!-- Search bar for filtering customers -->
     <div class="mb-6">
       <input
         type="text"
@@ -12,7 +11,6 @@
       />
     </div>
 
-    <!-- Form for adding new customers -->
     <form @submit.prevent="addCustomer" class="mb-6 flex flex-wrap gap-4">
       <input
         v-model="newCustomer.name"
@@ -41,7 +39,6 @@
       </button>
     </form>
 
-    <!-- Customer list display -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <div
         v-for="customer in filteredCustomers"
@@ -68,7 +65,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import CustomerService from '@/services/CustomerService.js'; // Ensure this path is correct
 
 export default {
   data() {
@@ -93,20 +90,18 @@ export default {
     }
   },
   methods: {
-    // Fetch customers from the server
     fetchCustomers() {
-      axios.get('/api/customers/')
+      CustomerService.getCustomers()
         .then(response => {
-          this.customers = response.data.customers;
+          this.customers = response.data;
           this.customers.forEach(customer => this.$set(customer, 'editing', false));
         })
         .catch(error => {
           console.error('Error fetching customers:', error);
         });
     },
-    // Add a new customer to the server
     addCustomer() {
-      axios.post('/api/customers/', this.newCustomer)
+      CustomerService.addCustomer(this.newCustomer)
         .then(() => {
           this.fetchCustomers();
           this.newCustomer = { name: '', city: '', age: 0 };
@@ -115,9 +110,8 @@ export default {
           console.error('Error adding customer:', error);
         });
     },
-    // Delete a customer from the server
     deleteCustomer(customerId) {
-      axios.delete(`/api/customers/${customerId}`)
+      CustomerService.deleteCustomer(customerId)
         .then(() => {
           this.fetchCustomers();
         })
@@ -125,18 +119,16 @@ export default {
           console.error('Error deleting customer:', error);
         });
     },
-    // Enable editing mode for a customer
     enableEditing(customer) {
       customer.editing = true;
     },
-    // Update customer details on the server
     updateCustomer(customer) {
       const updatedCustomer = {
         name: customer.name,
         city: customer.city,
         age: customer.age
       };
-      axios.put(`/api/customers/${customer.id}`, updatedCustomer)
+      CustomerService.updateCustomer(customer.id, updatedCustomer)
         .then(() => {
           customer.editing = false;
           this.fetchCustomers();
@@ -145,13 +137,11 @@ export default {
           console.error('Error updating customer:', error);
         });
     },
-    // Cancel editing mode without saving changes
     cancelEditing(customer) {
       customer.editing = false;
       this.fetchCustomers();
     }
   },
-  // Fetch customers when the component is mounted
   mounted() {
     this.fetchCustomers();
   }
@@ -159,5 +149,5 @@ export default {
 </script>
 
 <style scoped>
-/* Add any custom styles here */
+/* Add any custom styles for your customer page here */
 </style>
