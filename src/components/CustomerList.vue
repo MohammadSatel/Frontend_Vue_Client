@@ -1,10 +1,8 @@
 <template>
   <div class="customer-list">
     <ul>
-      <!-- List all customers with options to edit and delete -->
       <li v-for="customer in customers" :key="customer.id" class="customer-item">
-        <span>{{ customer.name }}</span>
-        <!-- Add buttons for editing and deleting customers -->
+        <span>{{ customer.name }} from {{ customer.city }}, {{ customer.age }} years old</span>
         <button @click="$emit('edit-customer', customer)">Edit</button>
         <button @click="$emit('delete-customer', customer.id)">Delete</button>
       </li>
@@ -15,27 +13,28 @@
 <script>
 export default {
   props: {
-    customers: Array,
+    customers: {
+      type: Array,
+      default: () => [],
+    },
   },
-  // Component logic goes here
 };
 </script>
 
 <style scoped>
-.customer-list {
-  /* Styles go here */
+.customer-list ul {
+  list-style-type: none;
+  padding: 0;
 }
 
 .customer-item {
-  /* Additional styles for customer items */
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
   align-items: center;
+  margin-bottom: 0.5rem;
 }
 
 .customer-item button {
-  /* Styles for buttons */
   margin-left: 1rem;
 }
 </style>
