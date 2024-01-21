@@ -1,7 +1,9 @@
 <template>
   <div class="container mx-auto p-6">
+    <!-- Page Title -->
     <h1 class="text-3xl font-semibold mb-5">Customers</h1>
 
+    <!-- Search Bar -->
     <div class="mb-6">
       <input
         type="text"
@@ -11,6 +13,7 @@
       />
     </div>
 
+    <!-- Form for Adding New Customer -->
     <form @submit.prevent="addCustomer" class="mb-6 flex flex-wrap gap-4">
       <input
         v-model="newCustomer.name"
@@ -39,19 +42,23 @@
       </button>
     </form>
 
+    <!-- Customer List -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <div
         v-for="customer in filteredCustomers"
         :key="customer.id"
         class="bg-white p-4 rounded shadow"
       >
+        <!-- Editable Fields for Update -->
         <div v-if="customer.editing">
-          <input v-model="customer.name" placeholder="Customer Name" class="p-2 border border-gray-300 rounded" />
-          <input v-model="customer.city" placeholder="City" class="p-2 border border-gray-300 rounded" />
-          <input v-model.number="customer.age" type="number" placeholder="Age" class="p-2 border border-gray-300 rounded" />
+          <input v-model="customer.name" class="p-2 border border-gray-300 rounded" />
+          <input v-model="customer.city" class="p-2 border border-gray-300 rounded" />
+          <input v-model.number="customer.age" type="number" class="p-2 border border-gray-300 rounded" />
           <button @click="updateCustomer(customer)" class="bg-green-500 text-white p-2 rounded">Save</button>
           <button @click="cancelEditing(customer)" class="bg-gray-500 text-white p-2 rounded">Cancel</button>
         </div>
+
+        <!-- Display Customer Details -->
         <div v-else>
           <h2 class="text-xl font-bold">{{ customer.name }}</h2>
           <p class="text-gray-600">City: {{ customer.city }}</p>
@@ -81,6 +88,7 @@ export default {
   },
   computed: {
     filteredCustomers() {
+      // Filters the customers based on the search query
       return this.searchQuery
         ? this.customers.filter(customer =>
             customer.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
@@ -91,9 +99,11 @@ export default {
   },
   methods: {
     fetchCustomers() {
+      // Fetches the list of customers from the server
       CustomerService.getCustomers()
         .then(response => {
-          this.customers = response.data;
+          this.customers = response.data.customers;
+          // Initializes the 'editing' property for each customer
           this.customers.forEach(customer => this.$set(customer, 'editing', false));
         })
         .catch(error => {
@@ -101,9 +111,11 @@ export default {
         });
     },
     addCustomer() {
+      // Adds a new customer to the server
       CustomerService.addCustomer(this.newCustomer)
         .then(() => {
           this.fetchCustomers();
+          // Resets the form fields
           this.newCustomer = { name: '', city: '', age: 0 };
         })
         .catch(error => {
@@ -111,6 +123,7 @@ export default {
         });
     },
     deleteCustomer(customerId) {
+      // Deletes a customer from the server
       CustomerService.deleteCustomer(customerId)
         .then(() => {
           this.fetchCustomers();
@@ -120,9 +133,11 @@ export default {
         });
     },
     enableEditing(customer) {
+      // Enables editing mode for a customer
       customer.editing = true;
     },
     updateCustomer(customer) {
+      // Updates a customer's details on the server
       const updatedCustomer = {
         name: customer.name,
         city: customer.city,
@@ -130,6 +145,7 @@ export default {
       };
       CustomerService.updateCustomer(customer.id, updatedCustomer)
         .then(() => {
+          // Disables editing mode and refreshes the list
           customer.editing = false;
           this.fetchCustomers();
         })
@@ -138,16 +154,19 @@ export default {
         });
     },
     cancelEditing(customer) {
+      // Cancels editing mode without saving changes
       customer.editing = false;
-      this.fetchCustomers();
+      // Optionally, refresh the list to revert any unsaved changes
+      // this.fetchCustomers();
     }
   },
   mounted() {
+    // Fetches the customer list when the component is mounted
     this.fetchCustomers();
   }
 };
 </script>
 
 <style scoped>
-/* Add any custom styles for your customer page here */
+/* Custom styles for the customer page */
 </style>
