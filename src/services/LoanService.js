@@ -7,7 +7,7 @@ export default {
   getLoans() {
     return axios.get(API_URL);
   },
-  createLoan(loanData) {
+  addLoan(loanData) {
     return axios.post(API_URL, loanData);
   },
   deleteLoan(loanId) {

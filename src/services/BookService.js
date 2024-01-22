@@ -19,3 +19,4 @@ export default {
     return apiClient.delete(`/books/${id}/`);
   },
 };
+
