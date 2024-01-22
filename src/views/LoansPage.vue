@@ -1,25 +1,50 @@
 <template>
   <div class="container mx-auto p-6">
-    <h1 class="text-3xl font-semibold mb-5">Loans</h1>
+    <h1 class="text-3xl font-semibold mb-5">Loans Management</h1>
 
-    <!-- Add your form for creating a new loan here -->
+    <!-- Form for adding a new loan -->
+    <form @submit.prevent="addLoan" class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Select customer -->
+      <div>
+        <label for="customer">Customer:</label>
+        <select id="customer" v-model="newLoan.customerId" required class="block w-full mt-1 p-2 border border-gray-300 rounded">
+          <option disabled value="">Select a customer</option>
+          <option v-for="customer in customers" :value="customer.id" :key="customer.id">{{ customer.name }}</option>
+        </select>
+      </div>
+
+      <!-- Select book -->
+      <div>
+        <label for="book">Book:</label>
+        <select id="book" v-model="newLoan.bookId" required class="block w-full mt-1 p-2 border border-gray-300 rounded">
+          <option disabled value="">Select a book</option>
+          <option v-for="book in books" :value="book.id" :key="book.id">{{ book.name }}</option>
+        </select>
+      </div>
+
+      <!-- Input for loan date -->
+      <div>
+        <label for="loanDate">Loan Date:</label>
+        <input id="loanDate" type="date" v-model="newLoan.loanDate" required class="block w-full mt-1 p-2 border border-gray-300 rounded">
+      </div>
+
+      <!-- Input for return date -->
+      <div>
+        <label for="returnDate">Return Date:</label>
+        <input id="returnDate" type="date" v-model="newLoan.returnDate" required class="block w-full mt-1 p-2 border border-gray-300 rounded">
+      </div>
+
+      <!-- Submit button -->
+      <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Create Loan</button>
+    </form>
 
     <!-- List of loans -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <div v-for="loan in loans" :key="loan.id" class="bg-white p-4 rounded shadow">
-        <div v-if="loan.editing">
-          <!-- Add input fields for editing loan details here -->
-          <button @click="updateLoan(loan)" class="bg-green-500 text-white p-2 rounded">Save</button>
-          <button @click="cancelEditing(loan)" class="bg-gray-500 text-white p-2 rounded">Cancel</button>
-        </div>
-        <div v-else>
-          <h2 class="text-xl font-bold">{{ loan.customer_name }}</h2>
-          <p class="text-gray-600">Book: {{ loan.book_name }}</p>
-          <p class="text-gray-600">Loan Date: {{ loan.loan_date }}</p>
-          <p class="text-gray-600">Return Date: {{ loan.return_date }}</p>
-          <button @click="enableEditing(loan)" class="bg-blue-500 text-white p-2 rounded">Edit</button>
-          <button @click="deleteLoan(loan.id)" class="bg-red-500 text-white p-2 rounded">Delete</button>
-        </div>
+        <h2 class="text-xl font-bold">{{ loan.customerName }} - {{ loan.bookName }}</h2>
+        <p>Loan Date: {{ new Date(loan.loanDate).toLocaleDateString() }}</p>
+        <p>Return Date: {{ new Date(loan.returnDate).toLocaleDateString() }}</p>
+        <button @click="deleteLoan(loan.id)" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded mt-2">Return Book</button>
       </div>
     </div>
   </div>
@@ -27,20 +52,21 @@
 
 <script>
 import LoanService from '@/services/LoanService.js';
+import CustomerService from '@/services/CustomerService.js';
+import BookService from '@/services/BookService.js';
 
 export default {
   data() {
     return {
       loans: [],
-      // Define newLoan data structure based on your loan model
+      customers: [],
+      books: [],
       newLoan: {
-        customer_name: '',
-        book_name: '',
-        loan_date: '',
-        return_date: '',
-        // Other loan attributes
-      },
-      // ...other data properties
+        customerId: '',
+        bookId: '',
+        loanDate: '',
+        returnDate: '',
+      }
     };
   },
   methods: {
@@ -48,24 +74,43 @@ export default {
       LoanService.getLoans()
         .then(response => {
           this.loans = response.data.loans;
-          // Initialize editing state
-          this.loans.forEach(loan => this.$set(loan, 'editing', false));
         })
         .catch(error => {
           console.error('Error fetching loans:', error);
         });
     },
-    addLoan() {
-      LoanService.addLoan(this.newLoan)
-        .then(() => {
-          this.fetchLoans();
-          // Reset the newLoan data
-          this.newLoan = {
-            // Reset structure
-          };
+    fetchCustomers() {
+      CustomerService.getCustomers()
+        .then(response => {
+          this.customers = response.data.customers;
         })
         .catch(error => {
-          console.error('Error adding loan:', error);
+          console.error('Error fetching customers:', error);
+        });
+    },
+    fetchBooks() {
+      BookService.getAllBooks()
+        .then(response => {
+          this.books = response.data.books;
+        })
+        .catch(error => {
+          console.error('Error fetching books:', error);
+        });
+    },
+    addLoan() {
+      const loanData = {
+        customerId: this.newLoan.customerId,
+        bookId: this.newLoan.bookId,
+        loanDate: this.newLoan.loanDate,
+        returnDate: this.newLoan.returnDate
+      };
+      LoanService.addLoan(loanData)
+        .then(() => {
+          this.fetchLoans();
+          this.resetForm();
+        })
+        .catch(error => {
+          console.error('Error creating loan:', error);
         });
     },
     deleteLoan(id) {
@@ -77,34 +122,23 @@ export default {
           console.error('Error deleting loan:', error);
         });
     },
-    enableEditing(loan) {
-      loan.editing = true;
-    },
-    updateLoan(loan) {
-      const updatedLoan = {
-        // Prepare the updated loan data
+    resetForm() {
+      this.newLoan = {
+        customerId: '',
+        bookId: '',
+        loanDate: '',
+        returnDate: ''
       };
-      LoanService.updateLoan(loan.id, updatedLoan)
-        .then(() => {
-          loan.editing = false;
-          this.fetchLoans();
-        })
-        .catch(error => {
-          console.error('Error updating loan:', error);
-        });
-    },
-    cancelEditing(loan) {
-      loan.editing = false;
-      // Optionally reset to original data or re-fetch
-      this.fetchLoans();
-    },
+    }
   },
   mounted() {
     this.fetchLoans();
+    this.fetchCustomers();
+    this.fetchBooks();
   }
 };
 </script>
 
 <style scoped>
-/* Add any custom styles for your Loans page here */
+/* Custom styles */
 </style>

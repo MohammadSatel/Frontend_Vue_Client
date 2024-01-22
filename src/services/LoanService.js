@@ -1,23 +1,19 @@
+// src/services/LoanService.js
 import axios from 'axios';
 
-const apiClient = axios.create({
-  baseURL: 'http://localhost:5000/api',
-  withCredentials: false,
-  headers: {
-    Accept: 'application/json',
-    'Content-Type': 'application/json'
-  }
-});
+const API_URL = 'http://127.0.0.1:5000/api/loans';
 
 export default {
   getLoans() {
-    return apiClient.get('/loans');
+    return axios.get(API_URL);
   },
-  addLoan(loan) {
-    return apiClient.post('/loans', loan);
+  createLoan(loanData) {
+    return axios.post(API_URL, loanData);
   },
-  deleteLoan(id) {
-    return apiClient.delete(`/loans/${id}`);
+  deleteLoan(loanId) {
+    return axios.delete(`${API_URL}/${loanId}`);
   },
-  // Add more methods for updating loans if needed
+  getLoanDetails(loanId) {
+    return axios.get(`${API_URL}/${loanId}`);
+  },
 };
