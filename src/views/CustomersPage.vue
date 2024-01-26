@@ -104,7 +104,7 @@ export default {
         .then(response => {
           this.customers = response.data.customers;
           // Initializes the 'editing' property for each customer
-          this.customers.forEach(customer => this.$set(customer, 'editing', false));
+          this.customers.forEach(customer => { customer.editing = false; });
         })
         .catch(error => {
           console.error('Error fetching customers:', error);

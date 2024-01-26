@@ -104,7 +104,7 @@ export default {
         .then(response => {
           this.books = response.data.books;
           // Ensure each book has an 'editing' property
-          this.books.forEach(book => this.$set(book, 'editing', false));
+          this.books.forEach(book => { book.editing = false; });
         })
         .catch(error => {
           console.error("Error fetching books:", error);
