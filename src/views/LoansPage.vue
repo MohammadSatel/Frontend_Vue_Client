@@ -71,6 +71,7 @@ export default {
   },
   methods: {
     fetchLoans() {
+      // Fetch the list of loans from the API
       LoanService.getLoans()
         .then(response => {
           this.loans = response.data.loans;
@@ -80,6 +81,7 @@ export default {
         });
     },
     fetchCustomers() {
+      // Fetch the list of customers from the API
       CustomerService.getCustomers()
         .then(response => {
           this.customers = response.data.customers;
@@ -89,6 +91,7 @@ export default {
         });
     },
     fetchBooks() {
+      // Fetch the list of books from the API
       BookService.getAllBooks()
         .then(response => {
           this.books = response.data.books;
@@ -98,31 +101,52 @@ export default {
         });
     },
     addLoan() {
+      // Ensure that a customer and book are selected
+      if (!this.newLoan.customerId || !this.newLoan.bookId) {
+        alert('Please select both a customer and a book.');
+        return;
+      }
+
+      // Find the selected customer and book objects
+      const selectedCustomer = this.customers.find(c => c.id === this.newLoan.customerId);
+      const selectedBook = this.books.find(b => b.id === this.newLoan.bookId);
+
+      // Construct the loan data to send to the API
       const loanData = {
-        customerId: this.newLoan.customerId,
-        bookId: this.newLoan.bookId,
-        loanDate: this.newLoan.loanDate,
-        returnDate: this.newLoan.returnDate
+        customer_name: selectedCustomer.name,
+        book_name: selectedBook.name,
+        loan_date: this.newLoan.loanDate,
+        return_date: this.newLoan.returnDate,
+        // Add additional data as required by your API
+        // original_author: selectedBook.author,
+        // original_year_published: selectedBook.year_published,
+        // original_book_type: selectedBook.book_type
       };
+
+      // Send the new loan data to the API
       LoanService.addLoan(loanData)
         .then(() => {
-          this.fetchLoans();
-          this.resetForm();
+          this.fetchLoans(); // Refresh the list of loans
+          this.resetForm();  // Clear the form inputs
         })
         .catch(error => {
           console.error('Error creating loan:', error);
+          // Handle error (e.g., show a message to the user)
         });
     },
     deleteLoan(id) {
+      // Send a request to the API to delete a loan by its ID
       LoanService.deleteLoan(id)
         .then(() => {
-          this.fetchLoans();
+          this.fetchLoans(); // Refresh the list of loans after deletion
         })
         .catch(error => {
           console.error('Error deleting loan:', error);
+          // Handle error (e.g., show a message to the user)
         });
     },
     resetForm() {
+      // Reset the newLoan data to clear the form fields
       this.newLoan = {
         customerId: '',
         bookId: '',
@@ -132,6 +156,7 @@ export default {
     }
   },
   mounted() {
+    // Fetch data when the component is mounted
     this.fetchLoans();
     this.fetchCustomers();
     this.fetchBooks();
@@ -140,5 +165,5 @@ export default {
 </script>
 
 <style scoped>
-/* Custom styles */
+/* Add custom styles here */
 </style>

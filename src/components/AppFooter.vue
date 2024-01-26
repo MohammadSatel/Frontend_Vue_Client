@@ -1,6 +1,6 @@
 <template>
   <footer class="bg-gray-200 text-center py-4">
-    <p>&copy; 2024 My Awesome Book Library. All rights reserved.</p>
+    <p>&copy; 2024 Book Library Created By Mohammad Satel.</p>
   </footer>
 </template>
 
