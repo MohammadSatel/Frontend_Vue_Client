@@ -8,8 +8,10 @@
       <li v-for="loan in loans" :key="loan.id">
         <!-- Loan details -->
         <div>
-          <h3>{{ loan.bookName }}</h3> <!-- Displaying the book name -->
-          <p>Loaned by: {{ loan.customerName }}</p> <!-- Displaying the customer name -->
+          <!-- Displaying the book name -->
+          <h3>{{ loan.bookName }}</h3>
+          <!-- Displaying the customer name -->
+          <p>Loaned by: {{ loan.customerName }}</p>
           <!-- Formatting and displaying the loan and return dates -->
           <p>Loan Date: {{ formatDate(loan.loanDate) }}</p>
           <p>Return Date: {{ formatDate(loan.returnDate) }}</p>
@@ -35,7 +37,8 @@ export default {
       const date = new Date(dateString);
       // Locale string options for date formatting
       const options = { year: 'numeric', month: 'long', day: 'numeric' };
-      return date.toLocaleDateString(undefined, options); // Adjust 'undefined' to your locale if needed
+      // Adjust 'undefined' to your locale if needed
+      return date.toLocaleDateString(undefined, options);
     },
   },
 };
